@@ -88,3 +88,4 @@ jobs:
           echo "Service deployed at: $SERVICE_URL"
           echo "Health check: $SERVICE_URL/logistics/ping"
 
+

@@ -122,3 +122,4 @@ class TestAppConfiguration:
         assert hasattr(app.config, 'from_pyfile')
         assert hasattr(app.config, 'from_envvar')
 
+

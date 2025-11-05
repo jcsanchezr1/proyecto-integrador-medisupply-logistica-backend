@@ -5,3 +5,4 @@ class HealthCheckView(Resource):
     def get(self):
         return "pong", 200
 
+

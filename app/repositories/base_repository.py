@@ -27,3 +27,4 @@ class BaseRepository(ABC):
     def delete(self, entity_id: int) -> bool:
         pass
 
+

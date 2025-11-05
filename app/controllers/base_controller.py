@@ -30,3 +30,4 @@ class BaseController(Resource):
             response["data"] = data
         return response, 201
 
+

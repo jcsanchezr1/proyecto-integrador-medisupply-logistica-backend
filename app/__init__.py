@@ -21,8 +21,13 @@ def create_app():
 
 def configure_routes(app):
     from .controllers.health_controller import HealthCheckView
+    from .controllers.route_controller import RouteCreateController, RouteListController, RouteDetailController, RouteDeleteAllController
     
     api = Api(app)
     
     api.add_resource(HealthCheckView, '/logistics/ping')
+    api.add_resource(RouteCreateController, '/logistics/routes')
+    api.add_resource(RouteListController, '/logistics/routes')
+    api.add_resource(RouteDetailController, '/logistics/routes/<int:route_id>')
+    api.add_resource(RouteDeleteAllController, '/logistics/routes/delete-all')
 

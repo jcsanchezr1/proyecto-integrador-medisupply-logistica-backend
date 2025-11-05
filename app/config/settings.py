@@ -24,3 +24,4 @@ def get_config():
     else:
         return DevelopmentConfig()
 
+

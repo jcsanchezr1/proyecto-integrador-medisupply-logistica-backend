@@ -23,3 +23,4 @@ class BaseService(ABC):
     def delete(self, entity_id: int) -> bool:
         pass
 
+

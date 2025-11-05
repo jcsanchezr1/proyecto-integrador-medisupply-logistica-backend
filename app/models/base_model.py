@@ -11,3 +11,4 @@ class BaseModel(ABC):
     def validate(self) -> None:
         pass
 
+

@@ -18,3 +18,4 @@ class TestHealthCheckView:
         assert response == "pong"
         assert status_code == 200
 
+
