@@ -1,0 +1,29 @@
+[run]
+source = app
+omit = 
+    */tests/*
+    */__pycache__/*
+    */venv/*
+    */env/*
+    */app/repositories/route_repository.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
+    pass
+    class .*\bProtocol\):
+    @(abc\.)?abstractmethod
+    logger\.debug
+    logger\.warning
+    logger\.error
+    logger\.info
+precision = 2
+show_missing = True
+skip_covered = False
+
