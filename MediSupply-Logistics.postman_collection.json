@@ -1,0 +1,1904 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "MediSupply Logistics API - Con Datos Aleatorios",
+		"description": "Colección para validar el servicio de logística MediSupply con datos aleatorios generados automáticamente",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test('Response is pong', function () {",
+							"    const responseText = pm.response.text().trim();",
+							"    pm.expect(responseText).to.eql('\"pong\"');",
+							"});",
+							"console.log('Health check validado correctamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/ping",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Auth Token Admin - Exitoso",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test('Response has access_token', function () {",
+							"    const responseJson = pm.response.json();",
+							"    pm.expect(responseJson).to.have.property('access_token');",
+							"    pm.expect(responseJson.access_token).to.be.a('string');",
+							"    pm.expect(responseJson.access_token).to.not.be.empty;",
+							"});",
+							"pm.test('Response has token_type', function () {",
+							"    const responseJson = pm.response.json();",
+							"    pm.expect(responseJson).to.have.property('token_type');",
+							"    pm.expect(responseJson.token_type).to.eql('Bearer');",
+							"});",
+							"const responseJson = pm.response.json();",
+							"if (responseJson && responseJson.access_token) {",
+							"    pm.globals.set('auth_token', responseJson.access_token);",
+							"    console.log('Token de autenticación guardado');",
+							"}",
+							"if (responseJson && responseJson.refresh_token) {",
+							"    pm.globals.set('refresh_token', responseJson.refresh_token);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"user\": \"medisupply05@gmail.com\",\n    \"password\": \"Admin123456\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_autenticador}}/auth/token",
+					"host": [
+						"{{url_local_autenticador}}"
+					],
+					"path": [
+						"auth",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Usuario de Prueba 1",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const timestamp = Date.now();",
+							"const randomNum = Math.floor(Math.random() * 10000);",
+							"const randomEmail = 'test.user.' + timestamp + '_' + randomNum + '@test.com';",
+							"const randomName = 'Usuario Prueba ' + timestamp;",
+							"const randomLat = (Math.random() * 0.1 + 4.5).toFixed(6);",
+							"const randomLng = (Math.random() * 0.1 + -74.0).toFixed(6);",
+							"const randomTaxId = Math.floor(Math.random() * 900000000) + 100000000;",
+							"const randomPhone = '3' + Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');",
+							"",
+							"pm.environment.set('test_user_1_email', randomEmail);",
+							"pm.environment.set('test_user_1_name', randomName);",
+							"pm.environment.set('test_user_1_lat', randomLat);",
+							"pm.environment.set('test_user_1_lng', randomLng);",
+							"pm.environment.set('test_user_1_tax_id', randomTaxId.toString());",
+							"pm.environment.set('test_user_1_phone', randomPhone);",
+							"pm.environment.set('test_user_1_password', 'Test123456');",
+							"",
+							"console.log('Usuario 1 generado:', randomEmail, randomName);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 201', function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test('Response is JSON', function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"pm.test('Response has data structure', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('data');",
+							"    pm.expect(response.data).to.have.property('id');",
+							"});",
+							"pm.test('User ID is saved for later use', function () {",
+							"    if (pm.response.code === 201) {",
+							"        const response = pm.response.json();",
+							"        if (response.data && response.data.id) {",
+							"            const userId = response.data.id;",
+							"            pm.environment.set('test_user_1_id', userId);",
+							"            pm.expect(userId).to.be.a('string');",
+							"            pm.expect(userId).to.not.be.empty;",
+							"            console.log('Usuario 1 creado exitosamente con ID:', userId);",
+							"        } else {",
+							"            console.error('ERROR: Usuario 1 no se creó correctamente - no hay ID en la respuesta');",
+							"        }",
+							"    } else {",
+							"        const errorResponse = pm.response.json();",
+							"        console.error('ERROR al crear Usuario 1:', errorResponse);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"{{test_user_1_name}}\",\n  \"tax_id\": \"{{test_user_1_tax_id}}\",\n  \"email\": \"{{test_user_1_email}}\",\n  \"address\": \"Calle 123 #45-67, Bogotá\",\n  \"phone\": \"{{test_user_1_phone}}\",\n  \"institution_type\": \"Hospital\",\n  \"specialty\": \"Cadena de frío\",\n  \"applicant_name\": \"Dr. Juan Pérez\",\n  \"applicant_email\": \"juan.perez@test.com\",\n  \"latitude\": {{test_user_1_lat}},\n  \"longitude\": {{test_user_1_lng}},\n  \"password\": \"{{test_user_1_password}}\",\n  \"confirm_password\": \"{{test_user_1_password}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_autenticador}}/auth/user",
+					"host": [
+						"{{url_local_autenticador}}"
+					],
+					"path": [
+						"auth",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Usuario de Prueba 2",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const timestamp = Date.now();",
+							"const randomNum = Math.floor(Math.random() * 10000);",
+							"const randomEmail = 'test.user.' + timestamp + '_' + randomNum + '@test.com';",
+							"const randomName = 'Usuario Prueba ' + timestamp;",
+							"const randomLat = (Math.random() * 0.1 + 4.5).toFixed(6);",
+							"const randomLng = (Math.random() * 0.1 + -74.0).toFixed(6);",
+							"const randomTaxId = Math.floor(Math.random() * 900000000) + 100000000;",
+							"const randomPhone = '3' + Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');",
+							"",
+							"pm.environment.set('test_user_2_email', randomEmail);",
+							"pm.environment.set('test_user_2_name', randomName);",
+							"pm.environment.set('test_user_2_lat', randomLat);",
+							"pm.environment.set('test_user_2_lng', randomLng);",
+							"pm.environment.set('test_user_2_tax_id', randomTaxId.toString());",
+							"pm.environment.set('test_user_2_phone', randomPhone);",
+							"pm.environment.set('test_user_2_password', 'Test123456');",
+							"",
+							"console.log('Usuario 2 generado:', randomEmail, randomName);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 201', function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test('User ID is saved for later use', function () {",
+							"    if (pm.response.code === 201) {",
+							"        const response = pm.response.json();",
+							"        if (response.data && response.data.id) {",
+							"            const userId = response.data.id;",
+							"            pm.environment.set('test_user_2_id', userId);",
+							"            pm.expect(userId).to.be.a('string');",
+							"            pm.expect(userId).to.not.be.empty;",
+							"            console.log('Usuario 2 creado exitosamente con ID:', userId);",
+							"        } else {",
+							"            console.error('ERROR: Usuario 2 no se creó correctamente - no hay ID en la respuesta');",
+							"        }",
+							"    } else {",
+							"        const errorResponse = pm.response.json();",
+							"        console.error('ERROR al crear Usuario 2:', errorResponse);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"{{test_user_2_name}}\",\n  \"tax_id\": \"{{test_user_2_tax_id}}\",\n  \"email\": \"{{test_user_2_email}}\",\n  \"address\": \"Calle 456 #78-90, Medellín\",\n  \"phone\": \"{{test_user_2_phone}}\",\n  \"institution_type\": \"Clínica\",\n  \"specialty\": \"Alto valor\",\n  \"applicant_name\": \"Dr. María García\",\n  \"applicant_email\": \"maria.garcia@test.com\",\n  \"latitude\": {{test_user_2_lat}},\n  \"longitude\": {{test_user_2_lng}},\n  \"password\": \"{{test_user_2_password}}\",\n  \"confirm_password\": \"{{test_user_2_password}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_autenticador}}/auth/user",
+					"host": [
+						"{{url_local_autenticador}}"
+					],
+					"path": [
+						"auth",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Usuario de Prueba 3",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const timestamp = Date.now();",
+							"const randomNum = Math.floor(Math.random() * 10000);",
+							"const randomEmail = 'test.user.' + timestamp + '_' + randomNum + '@test.com';",
+							"const randomName = 'Usuario Prueba ' + timestamp;",
+							"const randomLat = (Math.random() * 0.1 + 4.5).toFixed(6);",
+							"const randomLng = (Math.random() * 0.1 + -74.0).toFixed(6);",
+							"const randomTaxId = Math.floor(Math.random() * 900000000) + 100000000;",
+							"const randomPhone = '3' + Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');",
+							"",
+							"pm.environment.set('test_user_3_email', randomEmail);",
+							"pm.environment.set('test_user_3_name', randomName);",
+							"pm.environment.set('test_user_3_lat', randomLat);",
+							"pm.environment.set('test_user_3_lng', randomLng);",
+							"pm.environment.set('test_user_3_tax_id', randomTaxId.toString());",
+							"pm.environment.set('test_user_3_phone', randomPhone);",
+							"pm.environment.set('test_user_3_password', 'Test123456');",
+							"",
+							"console.log('Usuario 3 generado:', randomEmail, randomName);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 201', function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test('User ID is saved for later use', function () {",
+							"    if (pm.response.code === 201) {",
+							"        const response = pm.response.json();",
+							"        if (response.data && response.data.id) {",
+							"            const userId = response.data.id;",
+							"            pm.environment.set('test_user_3_id', userId);",
+							"            pm.expect(userId).to.be.a('string');",
+							"            pm.expect(userId).to.not.be.empty;",
+							"            console.log('Usuario 3 creado exitosamente con ID:', userId);",
+							"        } else {",
+							"            console.error('ERROR: Usuario 3 no se creó correctamente - no hay ID en la respuesta');",
+							"        }",
+							"    } else {",
+							"        const errorResponse = pm.response.json();",
+							"        console.error('ERROR al crear Usuario 3:', errorResponse);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"{{test_user_3_name}}\",\n  \"tax_id\": \"{{test_user_3_tax_id}}\",\n  \"email\": \"{{test_user_3_email}}\",\n  \"address\": \"Calle 789 #12-34, Cali\",\n  \"phone\": \"{{test_user_3_phone}}\",\n  \"institution_type\": \"Laboratorio\",\n  \"specialty\": \"Seguridad\",\n  \"applicant_name\": \"Dr. Carlos López\",\n  \"applicant_email\": \"carlos.lopez@test.com\",\n  \"latitude\": {{test_user_3_lat}},\n  \"longitude\": {{test_user_3_lng}},\n  \"password\": \"{{test_user_3_password}}\",\n  \"confirm_password\": \"{{test_user_3_password}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_autenticador}}/auth/user",
+					"host": [
+						"{{url_local_autenticador}}"
+					],
+					"path": [
+						"auth",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Producto de Prueba 1",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const randomSku = 'MED-' + Math.floor(Math.random() * 9000 + 1000);",
+							"const randomName = 'Producto de Prueba ' + Math.floor(Math.random() * 1000);",
+							"const randomLocation = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + '-' + ",
+							"    String(Math.floor(Math.random() * 99) + 1).padStart(2, '0') + '-' + ",
+							"    String(Math.floor(Math.random() * 99) + 1).padStart(2, '0');",
+							"const tipos = ['Alto valor', 'Seguridad', 'Cadena de frío'];",
+							"const randomTipo = tipos[Math.floor(Math.random() * tipos.length)];",
+							"const randomPrice = (Math.random() * 50 + 10).toFixed(2);",
+							"const randomQuantity = Math.floor(Math.random() * 50 + 10);",
+							"",
+							"pm.environment.set('test_product_1_sku', randomSku);",
+							"pm.environment.set('test_product_1_name', randomName);",
+							"pm.environment.set('test_product_1_location', randomLocation);",
+							"pm.environment.set('test_product_1_tipo', randomTipo);",
+							"pm.environment.set('test_product_1_price', randomPrice);",
+							"pm.environment.set('test_product_1_quantity', randomQuantity);",
+							"",
+							"console.log('Producto 1 generado:', randomSku, randomName);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 201', function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test('Product ID is saved for later use', function () {",
+							"    const response = pm.response.json();",
+							"    const productId = response.data.id;",
+							"    pm.environment.set('test_product_1_id', productId);",
+							"    pm.expect(productId).to.be.a('number');",
+							"    pm.expect(productId).to.be.above(0);",
+							"});",
+							"console.log('Producto 1 creado exitosamente con ID:', pm.environment.get('test_product_1_id'));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sku\": \"{{test_product_1_sku}}\",\n    \"name\": \"{{test_product_1_name}}\",\n    \"description\": \"Producto de prueba para rutas\",\n    \"expiration_date\": \"2025-12-31\",\n    \"quantity\": {{test_product_1_quantity}},\n    \"price\": {{test_product_1_price}},\n    \"location\": \"{{test_product_1_location}}\",\n    \"product_type\": \"{{test_product_1_tipo}}\",\n    \"provider_id\": \"6df72291-03ca-4e68-832e-d069e906c85c\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_inventario}}/inventory/products",
+					"host": [
+						"{{url_local_inventario}}"
+					],
+					"path": [
+						"inventory",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Producto de Prueba 2",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const randomSku = 'MED-' + Math.floor(Math.random() * 9000 + 1000);",
+							"const randomName = 'Producto de Prueba ' + Math.floor(Math.random() * 1000);",
+							"const randomLocation = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + '-' + ",
+							"    String(Math.floor(Math.random() * 99) + 1).padStart(2, '0') + '-' + ",
+							"    String(Math.floor(Math.random() * 99) + 1).padStart(2, '0');",
+							"const tipos = ['Alto valor', 'Seguridad', 'Cadena de frío'];",
+							"const randomTipo = tipos[Math.floor(Math.random() * tipos.length)];",
+							"const randomPrice = (Math.random() * 50 + 10).toFixed(2);",
+							"const randomQuantity = Math.floor(Math.random() * 30 + 5);",
+							"",
+							"pm.environment.set('test_product_2_sku', randomSku);",
+							"pm.environment.set('test_product_2_name', randomName);",
+							"pm.environment.set('test_product_2_location', randomLocation);",
+							"pm.environment.set('test_product_2_tipo', randomTipo);",
+							"pm.environment.set('test_product_2_price', randomPrice);",
+							"pm.environment.set('test_product_2_quantity', randomQuantity);",
+							"",
+							"console.log('Producto 2 generado:', randomSku, randomName);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 201', function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test('Product ID is saved for later use', function () {",
+							"    const response = pm.response.json();",
+							"    const productId = response.data.id;",
+							"    pm.environment.set('test_product_2_id', productId);",
+							"    pm.expect(productId).to.be.a('number');",
+							"});",
+							"console.log('Producto 2 creado exitosamente con ID:', pm.environment.get('test_product_2_id'));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sku\": \"{{test_product_2_sku}}\",\n    \"name\": \"{{test_product_2_name}}\",\n    \"description\": \"Producto de prueba para rutas\",\n    \"expiration_date\": \"2025-12-31\",\n    \"quantity\": {{test_product_2_quantity}},\n    \"price\": {{test_product_2_price}},\n    \"location\": \"{{test_product_2_location}}\",\n    \"product_type\": \"{{test_product_2_tipo}}\",\n    \"provider_id\": \"6df72291-03ca-4e68-832e-d069e906c85c\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_inventario}}/inventory/products",
+					"host": [
+						"{{url_local_inventario}}"
+					],
+					"path": [
+						"inventory",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Pedido 1 para Ruta",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"if (!pm.environment.get('test_route_truck')) {",
+							"    const futureDate = new Date();",
+							"    futureDate.setDate(futureDate.getDate() + Math.floor(Math.random() * 7 + 2));",
+							"    const scheduledDeliveryDate = futureDate.toISOString().split('T')[0];",
+							"    const trucks = ['CAM-001', 'CAM-002', 'CAM-003', 'CAM-004'];",
+							"    const randomTruck = trucks[Math.floor(Math.random() * trucks.length)];",
+							"    ",
+							"    pm.environment.set('test_route_truck', randomTruck);",
+							"    pm.environment.set('test_route_delivery_date', scheduledDeliveryDate);",
+							"    console.log('Camión y fecha generados:', randomTruck, scheduledDeliveryDate);",
+							"}",
+							"const randomTotalAmount = (Math.random() * 100 + 50).toFixed(2);",
+							"const randomQuantity = Math.floor(Math.random() * 5 + 1);",
+							"",
+							"pm.environment.set('test_order_1_total_amount', randomTotalAmount);",
+							"pm.environment.set('test_order_1_quantity', randomQuantity);",
+							"",
+							"console.log('Pedido 1 generado para camión:', pm.environment.get('test_route_truck'), 'fecha:', pm.environment.get('test_route_delivery_date'));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 201', function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test('Response is JSON', function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"pm.test('Order ID is saved for later use', function () {",
+							"    if (pm.response.code === 201) {",
+							"        const response = pm.response.json();",
+							"        if (response.data && response.data.id) {",
+							"            const orderId = response.data.id;",
+							"            pm.environment.set('test_order_1_id', orderId);",
+							"            pm.expect(orderId).to.be.a('number');",
+							"            console.log('Pedido 1 creado exitosamente con ID:', orderId);",
+							"        }",
+							"    } else {",
+							"        console.log('Error al crear pedido 1:', pm.response.json());",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"client_id\": \"{{test_user_1_id}}\",\n    \"total_amount\": {{test_order_1_total_amount}},\n    \"scheduled_delivery_date\": \"{{test_route_delivery_date}}T10:00:00\",\n    \"assigned_truck\": \"{{test_route_truck}}\",\n    \"items\": [\n        {\n            \"product_id\": {{test_product_1_id}},\n            \"quantity\": {{test_order_1_quantity}}\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{url_local_pedidos}}/orders/create",
+					"host": [
+						"{{url_local_pedidos}}"
+					],
+					"path": [
+						"orders",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Pedido 2 para Ruta",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const randomTotalAmount = (Math.random() * 100 + 50).toFixed(2);",
+							"const randomQuantity = Math.floor(Math.random() * 5 + 1);",
+							"",
+							"pm.environment.set('test_order_2_total_amount', randomTotalAmount);",
+							"pm.environment.set('test_order_2_quantity', randomQuantity);",
+							"",
+							"console.log('Pedido 2 generado para la misma ruta');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 201', function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test('Order ID is saved for later use', function () {",
+							"    if (pm.response.code === 201) {",
+							"        const response = pm.response.json();",
+							"        if (response.data && response.data.id) {",
+							"            const orderId = response.data.id;",
+							"            pm.environment.set('test_order_2_id', orderId);",
+							"            pm.expect(orderId).to.be.a('number');",
+							"        }",
+							"    }",
+							"});",
+							"if (pm.response.code === 201) {",
+							"    console.log('Pedido 2 creado exitosamente con ID:', pm.environment.get('test_order_2_id'));",
+							"} else {",
+							"    console.log('Error al crear pedido 2:', pm.response.json());",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"client_id\": \"{{test_user_2_id}}\",\n    \"total_amount\": {{test_order_2_total_amount}},\n    \"scheduled_delivery_date\": \"{{test_route_delivery_date}}T10:00:00\",\n    \"assigned_truck\": \"{{test_route_truck}}\",\n    \"items\": [\n        {\n            \"product_id\": {{test_product_2_id}},\n            \"quantity\": {{test_order_2_quantity}}\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{url_local_pedidos}}/orders/create",
+					"host": [
+						"{{url_local_pedidos}}"
+					],
+					"path": [
+						"orders",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Pedido 3 para Ruta (Mismo Cliente)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const randomTotalAmount = (Math.random() * 100 + 50).toFixed(2);",
+							"const randomQuantity = Math.floor(Math.random() * 5 + 1);",
+							"",
+							"pm.environment.set('test_order_3_total_amount', randomTotalAmount);",
+							"pm.environment.set('test_order_3_quantity', randomQuantity);",
+							"",
+							"console.log('Pedido 3 generado (mismo cliente que pedido 1)');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 201', function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test('Order ID is saved for later use', function () {",
+							"    if (pm.response.code === 201) {",
+							"        const response = pm.response.json();",
+							"        if (response.data && response.data.id) {",
+							"            const orderId = response.data.id;",
+							"            pm.environment.set('test_order_3_id', orderId);",
+							"            pm.expect(orderId).to.be.a('number');",
+							"            console.log('Pedido 3 creado exitosamente con ID:', orderId);",
+							"        }",
+							"    } else {",
+							"        console.log('Error al crear pedido 3:', pm.response.json());",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"client_id\": \"{{test_user_1_id}}\",\n    \"total_amount\": {{test_order_3_total_amount}},\n    \"scheduled_delivery_date\": \"{{test_route_delivery_date}}T10:00:00\",\n    \"assigned_truck\": \"{{test_route_truck}}\",\n    \"items\": [\n        {\n            \"product_id\": {{test_product_1_id}},\n            \"quantity\": {{test_order_3_quantity}}\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{url_local_pedidos}}/orders/create",
+					"host": [
+						"{{url_local_pedidos}}"
+					],
+					"path": [
+						"orders",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Pedido 4 para Ruta",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const randomTotalAmount = (Math.random() * 100 + 50).toFixed(2);",
+							"const randomQuantity = Math.floor(Math.random() * 5 + 1);",
+							"",
+							"pm.environment.set('test_order_4_total_amount', randomTotalAmount);",
+							"pm.environment.set('test_order_4_quantity', randomQuantity);",
+							"",
+							"console.log('Pedido 4 generado para la misma ruta');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 201', function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test('Order ID is saved for later use', function () {",
+							"    if (pm.response.code === 201) {",
+							"        const response = pm.response.json();",
+							"        if (response.data && response.data.id) {",
+							"            const orderId = response.data.id;",
+							"            pm.environment.set('test_order_4_id', orderId);",
+							"            pm.expect(orderId).to.be.a('number');",
+							"        }",
+							"    }",
+							"});",
+							"if (pm.response.code === 201) {",
+							"    console.log('Pedido 4 creado exitosamente con ID:', pm.environment.get('test_order_4_id'));",
+							"} else {",
+							"    console.log('Error al crear pedido 4:', pm.response.json());",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"client_id\": \"{{test_user_3_id}}\",\n    \"total_amount\": {{test_order_4_total_amount}},\n    \"scheduled_delivery_date\": \"{{test_route_delivery_date}}T10:00:00\",\n    \"assigned_truck\": \"{{test_route_truck}}\",\n    \"items\": [\n        {\n            \"product_id\": {{test_product_2_id}},\n            \"quantity\": {{test_order_4_quantity}}\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{url_local_pedidos}}/orders/create",
+					"host": [
+						"{{url_local_pedidos}}"
+					],
+					"path": [
+						"orders",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Ruta - Éxito",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const truck = pm.environment.get('test_route_truck');",
+							"const date = pm.environment.get('test_route_delivery_date');",
+							"const user1Id = pm.environment.get('test_user_1_id');",
+							"const user2Id = pm.environment.get('test_user_2_id');",
+							"const user3Id = pm.environment.get('test_user_3_id');",
+							"const product1Id = pm.environment.get('test_product_1_id');",
+							"const product2Id = pm.environment.get('test_product_2_id');",
+							"",
+							"if (!truck || !date) {",
+							"    console.error('ERROR: No se ha generado camión o fecha para la ruta');",
+							"}",
+							"if (!user1Id || !user2Id || !user3Id) {",
+							"    console.warn('ADVERTENCIA: Algunos usuarios no se crearon correctamente');",
+							"}",
+							"if (!product1Id || !product2Id) {",
+							"    console.error('ERROR: Los productos no se crearon correctamente');",
+							"}",
+							"",
+							"console.log('Creando ruta para camión:', truck, 'fecha:', date);",
+							"console.log('Usuarios disponibles:', user1Id, user2Id, user3Id);",
+							"console.log('Productos disponibles:', product1Id, product2Id);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 201', function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test('Response is JSON', function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"pm.test('Response has success structure', function () {",
+							"    if (pm.response.code === 201) {",
+							"        const response = pm.response.json();",
+							"        pm.expect(response).to.have.property('success');",
+							"        pm.expect(response).to.have.property('message');",
+							"        pm.expect(response).to.have.property('data');",
+							"        pm.expect(response.success).to.be.true;",
+							"    }",
+							"});",
+							"pm.test('Route has required fields', function () {",
+							"    if (pm.response.code === 201) {",
+							"        const response = pm.response.json();",
+							"        const route = response.data;",
+							"        pm.expect(route).to.have.property('id');",
+							"        pm.expect(route).to.have.property('route_code');",
+							"        pm.expect(route).to.have.property('assigned_truck');",
+							"        pm.expect(route).to.have.property('delivery_date');",
+							"        pm.expect(route).to.have.property('orders_count');",
+							"    }",
+							"});",
+							"pm.test('Route code format is correct', function () {",
+							"    if (pm.response.code === 201) {",
+							"        const response = pm.response.json();",
+							"        const route = response.data;",
+							"        pm.expect(route.route_code).to.match(/^ROU-\\d{4}$/);",
+							"    }",
+							"});",
+							"pm.test('Route ID is saved for later use', function () {",
+							"    if (pm.response.code === 201) {",
+							"        const response = pm.response.json();",
+							"        const route = response.data;",
+							"        const routeId = route.id;",
+							"        pm.environment.set('test_route_id', routeId);",
+							"        pm.expect(routeId).to.be.a('number');",
+							"        pm.expect(routeId).to.be.above(0);",
+							"    }",
+							"});",
+							"pm.test('Orders count matches expected', function () {",
+							"    if (pm.response.code === 201) {",
+							"        const response = pm.response.json();",
+							"        const route = response.data;",
+							"        pm.expect(route.orders_count).to.be.at.least(1);",
+							"    }",
+							"});",
+							"if (pm.response.code === 201) {",
+							"    console.log('Ruta creada exitosamente con ID:', pm.environment.get('test_route_id'));",
+							"} else {",
+							"    const errorResponse = pm.response.json();",
+							"    console.log('Error al crear ruta:', errorResponse);",
+							"    if (errorResponse.details) {",
+							"        console.log('Detalles del error:', errorResponse.details);",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"assigned_truck\": \"{{test_route_truck}}\",\n    \"delivery_date\": \"{{test_route_delivery_date}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Ruta - Error Sin JSON",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 400 or 500', function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([400, 500]);",
+							"});",
+							"pm.test('Response is JSON', function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"pm.test('Response has error structure', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('error');",
+							"    if (response.hasOwnProperty('success')) {",
+							"        pm.expect(response.success).to.be.false;",
+							"    }",
+							"});",
+							"console.log('Error de JSON faltante validado correctamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Ruta - Error Camión Faltante",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const futureDate = new Date();",
+							"futureDate.setDate(futureDate.getDate() + 2);",
+							"const scheduledDeliveryDate = futureDate.toISOString().split('T')[0];",
+							"pm.environment.set('test_error_delivery_date', scheduledDeliveryDate);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 400', function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"pm.test('Response has error structure', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('success');",
+							"    pm.expect(response).to.have.property('error');",
+							"    pm.expect(response.success).to.be.false;",
+							"});",
+							"pm.test('Error message contains assigned_truck', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.details).to.include('assigned_truck');",
+							"});",
+							"console.log('Error de camión faltante validado correctamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"delivery_date\": \"{{test_error_delivery_date}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Ruta - Error Fecha Faltante",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 400', function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"pm.test('Error message contains delivery_date', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.details).to.include('delivery_date');",
+							"});",
+							"console.log('Error de fecha faltante validado correctamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"assigned_truck\": \"CAM-001\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Ruta - Error Camión Inválido",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const futureDate = new Date();",
+							"futureDate.setDate(futureDate.getDate() + 2);",
+							"const scheduledDeliveryDate = futureDate.toISOString().split('T')[0];",
+							"pm.environment.set('test_error_invalid_date', scheduledDeliveryDate);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 400', function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"pm.test('Error message contains camión no es válido', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.details).to.include('no es válido');",
+							"});",
+							"console.log('Error de camión inválido validado correctamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"assigned_truck\": \"CAM-999\",\n    \"delivery_date\": \"{{test_error_invalid_date}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Ruta - Error Fecha Pasada",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 400', function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"pm.test('Error message contains fecha de entrega', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.details).to.include('fecha de entrega');",
+							"});",
+							"console.log('Error de fecha pasada validado correctamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"assigned_truck\": \"CAM-001\",\n    \"delivery_date\": \"2020-01-01\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Ruta - Error Ruta Ya Existe",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 422', function () {",
+							"    pm.response.to.have.status(422);",
+							"});",
+							"pm.test('Error message contains ya tiene una ruta', function () {",
+							"    const response = pm.response.json();",
+							"    const errorMessage = (response.details || response.error || '').toLowerCase();",
+							"    pm.expect(errorMessage).to.include('ya tiene una ruta');",
+							"});",
+							"console.log('Error de ruta existente validado correctamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"assigned_truck\": \"{{test_route_truck}}\",\n    \"delivery_date\": \"{{test_route_delivery_date}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Ruta - Error Sin Pedidos",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const futureDate = new Date();",
+							"futureDate.setDate(futureDate.getDate() + 30);",
+							"const scheduledDeliveryDate = futureDate.toISOString().split('T')[0];",
+							"pm.environment.set('test_no_orders_date', scheduledDeliveryDate);",
+							"console.log('Intentando crear ruta para fecha sin pedidos:', scheduledDeliveryDate);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 422', function () {",
+							"    pm.response.to.have.status(422);",
+							"});",
+							"pm.test('Response has error structure', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('success');",
+							"    pm.expect(response.success).to.be.false;",
+							"});",
+							"pm.test('Error message contains no tiene pedidos', function () {",
+							"    const response = pm.response.json();",
+							"    const errorMessage = (response.details || response.error || '').toLowerCase();",
+							"    pm.expect(errorMessage).to.include('no tiene pedidos');",
+							"});",
+							"console.log('Error de sin pedidos validado correctamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"assigned_truck\": \"CAM-005\",\n    \"delivery_date\": \"{{test_no_orders_date}}\"\n}"
+				},
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Rutas - Sin Filtros",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test('Response is JSON', function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"pm.test('Response has success structure', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('success');",
+							"    pm.expect(response).to.have.property('message');",
+							"    pm.expect(response).to.have.property('data');",
+							"    pm.expect(response.success).to.be.true;",
+							"});",
+							"pm.test('Data has routes and pagination', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.data).to.have.property('routes');",
+							"    pm.expect(response.data).to.have.property('pagination');",
+							"    pm.expect(response.data.routes).to.be.an('array');",
+							"});",
+							"pm.test('Pagination has required fields', function () {",
+							"    const response = pm.response.json();",
+							"    const pagination = response.data.pagination;",
+							"    pm.expect(pagination).to.have.property('page');",
+							"    pm.expect(pagination).to.have.property('per_page');",
+							"    pm.expect(pagination).to.have.property('total');",
+							"    pm.expect(pagination).to.have.property('total_pages');",
+							"});",
+							"console.log('Rutas listadas exitosamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Rutas - Con Paginación",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test('Response has pagination', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.data.pagination.page).to.eql(1);",
+							"    pm.expect(response.data.pagination.per_page).to.eql(5);",
+							"});",
+							"console.log('Rutas listadas con paginación exitosamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes?page=1&per_page=5",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "per_page",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Rutas - Filtro por Camión",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test('All routes match assigned truck', function () {",
+							"    const response = pm.response.json();",
+							"    const routes = response.data.routes;",
+							"    const expectedTruck = pm.environment.get('test_route_truck');",
+							"    routes.forEach(function(route) {",
+							"        pm.expect(route.assigned_truck).to.eql(expectedTruck);",
+							"    });",
+							"});",
+							"console.log('Rutas filtradas por camión exitosamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes?assigned_truck={{test_route_truck}}",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					],
+					"query": [
+						{
+							"key": "assigned_truck",
+							"value": "{{test_route_truck}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Rutas - Filtro por Fecha",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test('All routes match delivery date', function () {",
+							"    const response = pm.response.json();",
+							"    const routes = response.data.routes;",
+							"    const expectedDate = pm.environment.get('test_route_delivery_date');",
+							"    routes.forEach(function(route) {",
+							"        pm.expect(route.delivery_date).to.eql(expectedDate);",
+							"    });",
+							"});",
+							"console.log('Rutas filtradas por fecha exitosamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes?delivery_date={{test_route_delivery_date}}",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					],
+					"query": [
+						{
+							"key": "delivery_date",
+							"value": "{{test_route_delivery_date}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Rutas - Error Página Inválida",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 400', function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"pm.test('Error message contains page', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.details).to.include('page');",
+							"});",
+							"console.log('Error de página inválida validado correctamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes?page=0",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Rutas - Error Per Page Inválido",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 400', function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"pm.test('Error message contains per_page', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.details).to.include('per_page');",
+							"});",
+							"console.log('Error de per_page inválido validado correctamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes?per_page=101",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes"
+					],
+					"query": [
+						{
+							"key": "per_page",
+							"value": "101"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtener Detalle de Ruta - Éxito",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const routeId = pm.environment.get('test_route_id');",
+							"if (!routeId) {",
+							"    console.log('No hay ruta creada aún, saltando este test');",
+							"    pm.environment.set('skip_route_detail_test', true);",
+							"} else {",
+							"    pm.environment.set('skip_route_detail_test', false);",
+							"    console.log('Obteniendo detalle de ruta ID:', routeId);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const skipTest = pm.environment.get('skip_route_detail_test');",
+							"if (skipTest === 'true') {",
+							"    console.log('Test saltado: No hay ruta creada');",
+							"    return;",
+							"}",
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test('Response is JSON', function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"pm.test('Response has success structure', function () {",
+							"    if (pm.response.code === 200) {",
+							"        const response = pm.response.json();",
+							"        pm.expect(response).to.have.property('success');",
+							"        pm.expect(response).to.have.property('message');",
+							"        pm.expect(response).to.have.property('data');",
+							"        pm.expect(response.success).to.be.true;",
+							"    }",
+							"});",
+							"pm.test('Route detail has required fields', function () {",
+							"    if (pm.response.code === 200) {",
+							"        const response = pm.response.json();",
+							"        pm.expect(response.data).to.have.property('route');",
+							"        pm.expect(response.data).to.have.property('clients');",
+							"        const route = response.data.route;",
+							"        pm.expect(route).to.have.property('id');",
+							"        pm.expect(route).to.have.property('route_code');",
+							"        pm.expect(route).to.have.property('assigned_truck');",
+							"        pm.expect(route).to.have.property('delivery_date');",
+							"        pm.expect(route).to.have.property('orders_count');",
+							"    }",
+							"});",
+							"pm.test('Route has clients information', function () {",
+							"    if (pm.response.code === 200) {",
+							"        const response = pm.response.json();",
+							"        pm.expect(response.data).to.have.property('clients');",
+							"        pm.expect(response.data.clients).to.be.an('array');",
+							"    }",
+							"});",
+							"if (pm.response.code === 200) {",
+							"    console.log('Detalle de ruta obtenido exitosamente');",
+							"} else {",
+							"    console.log('Error al obtener detalle de ruta:', pm.response.json());",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes/{{test_route_id}}",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes",
+						"{{test_route_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Obtener Detalle de Ruta - Error No Encontrada",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 404', function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"pm.test('Response has error structure', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('success');",
+							"    pm.expect(response).to.have.property('error');",
+							"    pm.expect(response.success).to.be.false;",
+							"});",
+							"console.log('Error de ruta no encontrada validado correctamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes/99999",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes",
+						"99999"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Eliminar Todas las Rutas",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test('Response is JSON', function () {",
+							"    pm.response.to.be.json;",
+							"});",
+							"pm.test('Response has success structure', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('success');",
+							"    pm.expect(response).to.have.property('message');",
+							"    pm.expect(response).to.have.property('data');",
+							"    pm.expect(response.success).to.be.true;",
+							"});",
+							"pm.test('Response has deleted_count', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.data).to.have.property('deleted_count');",
+							"    pm.expect(response.data.deleted_count).to.be.a('number');",
+							"});",
+							"console.log('Rutas eliminadas exitosamente');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url_local_logistica}}/logistics/routes/delete-all",
+					"host": [
+						"{{url_local_logistica}}"
+					],
+					"path": [
+						"logistics",
+						"routes",
+						"delete-all"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "url_local_logistica",
+			"value": "http://localhost:8082",
+			"type": "string"
+		},
+		{
+			"key": "url_local_pedidos",
+			"value": "http://localhost:8082",
+			"type": "string"
+		},
+		{
+			"key": "url_local_autenticador",
+			"value": "http://localhost:8082",
+			"type": "string"
+		},
+		{
+			"key": "url_local_inventario",
+			"value": "http://localhost:8082",
+			"type": "string"
+		}
+	]
+}
+
