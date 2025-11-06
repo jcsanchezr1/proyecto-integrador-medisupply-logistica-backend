@@ -15,6 +15,8 @@ env:
 
   DATABASE_URL: ${{ vars.DATABASE_URL }}
   SIGNING_SERVICE_ACCOUNT_EMAIL: ${{ vars.SIGNING_SERVICE_ACCOUNT_EMAIL }}
+  ORDERS_SERVICE_URL: ${{ vars.ORDERS_SERVICE_URL }}
+  AUTH_SERVICE_URL: ${{ vars.AUTH_SERVICE_URL }}
 
   IMAGE_TAG: ${{ github.sha }}
   IMAGE_LATEST: latest
@@ -74,7 +76,7 @@ jobs:
             --region ${{ env.GCP_REGION }} \
             --platform managed \
             --service-account ${{ env.SIGNING_SERVICE_ACCOUNT_EMAIL }} \
-            --set-env-vars HOST="0.0.0.0",DEBUG="false",DATABASE_URL="${{ env.DATABASE_URL }}",GCP_PROJECT_ID="${{ env.GCP_PROJECT_ID }}",SIGNING_SERVICE_ACCOUNT_EMAIL="${{ env.SIGNING_SERVICE_ACCOUNT_EMAIL }}" \
+            --set-env-vars HOST="0.0.0.0",DEBUG="false",DATABASE_URL="${{ env.DATABASE_URL }}",GCP_PROJECT_ID="${{ env.GCP_PROJECT_ID }}",SIGNING_SERVICE_ACCOUNT_EMAIL="${{ env.SIGNING_SERVICE_ACCOUNT_EMAIL }}",ORDERS_SERVICE_URL="${{ env.ORDERS_SERVICE_URL }}",AUTH_SERVICE_URL="${{ env.AUTH_SERVICE_URL }}" \
             --memory 2Gi \
             --cpu 2 \
             --min-instances 1 \
