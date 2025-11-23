@@ -10,7 +10,7 @@ config = get_config()
 
 DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql+psycopg2://medisupply_local_user:medisupply_local_password@localhost:5432/medisupply_local_db')
 
-engine = create_engine(DATABASE_URL, echo=config.DEBUG)
+engine = create_engine(DATABASE_URL, echo=config.DEBUG, pool_size=20, max_overflow=30)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
